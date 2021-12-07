@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>JPG</title>
+	<link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+
+    <style>
+        .videobg {
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+        }
+
+        video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        object-fit: cover;
+		}
+
+        body {
+            background-color: white;
+        }
+
+    </style>
+</head>
+
+<body>
+<header class="main_menu home_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand" href="/index"> <img src="../static/img/Logo.png" height="30px"> </a>
+                        <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
+                            <ul class="navbar-nav" style="font-family: NEXON Lv2 Gothic Bold;">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/index">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#about">About</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_get">Cat Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_get2">Tree Test</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="banner_part" >
+        <div class="container">
+
+            <div id="videobg">
+                <video autoplay loop muted>
+                    <source src="../static/img/video2.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="banner_text" style="font-family: NEXON Lv2 Gothic Bold;">
+                        <div class="banner_text_iner" style="line-height: 40px;">
+                            <h1>Drawing<br> <span style="color: gold;">Psychoanalysis</span></h1>
+                            <div style="line-height: 30px;  color: whitesmoke; font-family: 'NEXON Lv2 Gothic Light';" >
+                                그림을 업로드하여 심리를 분석할 수 있는 온라인 서비스입니다. <br/>
+                                고양이 그림이나 나무 그림을 그린 후 올리면 딥러닝 모델이 분석을 하여 결과를 보여줄 것입니다.</div>
+                            <br/>
+                        </div>
+                    </div>
+                    <a class="button" href="/det_get" style="font-weight: 500;">검사하러가기</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about_part" id="about">
+        <br/>
+        <h1 style="font-family: NEXON Lv2 Gothic Bold;"> About </h1>
+        <hr/>
+        <div class="explain" style="line-height: 32px;">
+        <p> 한 사람의 내담자와 그가 겪고 있는 심리적인 문제를 깊이 이해하기 위해서, 상담자는 임상면접, 행동관찰, 그리고 심리검사라는 임상적 도구(clinical tool)를 활용합니다.
+            일반적으로, 임상면접(clinical interview)은 상담자가 내담자와 만나 대화를 나누면서 정보를 수집하는 언어적 활동인 반면, 행동관찰(behavioral observation)은 겉으로 드러나는 내담자의 전반적인 태도와 행동에서 정보를 탐색하는 비언어적 활동입니다.
+            심리검사(psychological testing)는 표준화된 측정도구를 사용하여 내담자의 문제에 대한 진단과 평가를 돕는 활동을 말합니다. <br/><br/>
+            흔히, 일반인에게는 심리검사라는 말이 익숙하지만, 전문가들은 심리평가(psychological evaluation)라는 표현을 선호합니다.
+            독자의 이해를 돕기 위해 저희도 심리검사라는 용어를 사용했지만, 사실은 심리평가와 구분해서 이해하실 필요가 있습니다.
+            심리검사는 지능검사, 성격검사, 적성검사 등의 개별적인 검사를 가리키는 용어인데 비해, 심리평가는 여러 종류의 심리검사를 실시하여 얻어진 자료와 심층적인 임상면접 및 체계적인 행동관찰을 통해 얻어진 정보를 종합하고 해석하는 전문적인 과정을 말합니다.
+            그리고 그 결과를 내담자, 보호자 혹은 평가를 의뢰한 사람에게 전달하고 의사소통하는 과정까지도 심리평가에 포함됩니다.
+            즉, 심리평가는 상담자가 활용할 수 있는 임상적 도구를 총동원하는 복잡하고 전문적인 과정을 의미합니다.
+        </p>
+        </div>
+    </section>
+
+    <footer id = "footer">
+        <div style="text-align: center; line-height: 32px;">
+<!--            구본정, 장정인, 파올라-->
+            <a href="https://ivpl.sookmyung.ac.kr">
+                <img src="../static/img/ivpl_logo.png" style="width:150px">
+            </a>
+            <br>
+<!--            http://www.sookmyung.ac.kr/sookmyungkr/index.do-->
+        </div>
+    </footer>
+</body>
+</html>

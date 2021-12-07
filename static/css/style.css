@@ -1,0 +1,280 @@
+@font-face {
+  font-family: 'NEXON Lv2 Gothic Light';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON Lv2 Gothic Light.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+          
+
+@font-face {
+  font-family: 'NEXON Lv2 Gothic';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON Lv2 Gothic.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NEXON Lv2 Gothic Bold';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON Lv2 Gothic Bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+          
+
+/**************menu part start*****************/		
+header {
+  background-color: rgba(0, 0, 0, 0.8);
+  height: 10%;
+}
+
+body{
+  font-family: 'NEXON Lv2 Gothic';
+  background-color:white;
+}
+
+option{
+
+}
+
+.main_menu {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+}
+
+/* logo */
+.main_menu .navbar-brand {
+  padding-bottom: 0px;
+  color:  #ffcc00;
+  padding: 2px;
+}
+
+.main_menu .navbar-brand:hover {
+  color: #ffcc00;
+}
+
+.main_menu .main-menu-item {
+  padding-left: 500px;
+}
+
+
+.main_menu .main-menu-item ul li .nav-link {
+  margin: 10px;
+  width: 120px;
+  color:ivory;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.main_menu .main-menu-item ul li .nav-link:hover {
+  color: #ffcc00;
+}
+
+nav {
+  height: 10%;
+}
+
+
+
+
+/**************** banner part css start ****************/
+.button {
+  background-color: #ffcc00;
+  border: 2px solid;
+  border-radius: 5px;
+  padding: 3% 15% 3% 15%;
+  position: relative;
+  width: 300px;
+  color: rgb(39, 39, 39);
+  font-size: 20pt;
+}
+
+.button:hover {
+  color: black;
+  text-decoration: none;
+}
+
+.banner_part {
+  position: relative;
+  height: 800px;
+}
+
+@media (max-width: 991px) {
+  .banner_part {
+    height: 800px;
+  }
+}
+
+
+.banner_part .banner_text {
+  padding-top: 200px;
+  font-weight: bold;
+}
+
+.banner_part .banner_text h5 {
+  font-size: 36px;
+  font-weight: 500;
+  color: ivory;
+}
+
+@media (max-width: 991px) {
+  .banner_part .banner_text h5 {
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+}
+
+.banner_part .banner_text h1 {
+  font-size: 63px;
+  font-weight: 700;
+  color:ivory;
+  position: relative;
+}
+
+
+
+@media (max-width: 576px) {
+  .banner_part .banner_text h1 {
+    font-size: 30px;
+    margin-bottom: 15px;
+    line-height: 1.3;
+  }
+}
+
+@media only screen and (min-width: 576px) and (max-width: 767px) {
+  .banner_part .banner_text h1 {
+    font-size: 30px;
+    margin-bottom: 15px;
+    line-height: 1.3;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .banner_part .banner_text h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+    line-height: 1.3;
+  }
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1200px) {
+  .banner_part .banner_text h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+    line-height: 1.4;
+  }
+}
+
+
+/**************** about part css start ****************/
+.about_part {
+  margin-top: 80px;
+  margin-bottom: 100px;
+  text-align: center;
+}
+.about_part h1 {
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.about_part hr {
+  width: 20%;
+  border: 1px solid silver;
+}
+
+.about_part p {
+  margin: 3% 25%;
+}
+
+/**************** upload_part css start ****************/
+.upload_part {
+  text-align: center;
+  margin-top: 9%;
+  margin-bottom: 8%;
+}
+
+#view_area_cat{
+  width: 600px;
+  height: 400px;
+  margin: auto;
+  background-image: url("../img/catimg.jpg");
+}
+
+#view_area_tree{
+  width: 600px;
+  height: 400px;
+  margin: auto;
+  background-image: url("../img/treeimg.jpg");
+}
+
+input[type="file"] {
+  position: absolute;
+  z-index: -1;
+  top: 6px;
+  left: 0px;
+  font-size: 15px;
+  color: rgb(153,153,153);
+}
+
+input[type="submit"] {
+  position: absolute;
+  z-index: -1;
+  top: 6px;
+  left: 0px;
+  font-size: 15px;
+  color: rgb(153,153,153);
+}
+
+.new-radio{
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.button-wrap {
+  position: relative;
+  display: inline;
+  margin: auto;
+}
+
+.new-button {
+    display: inline-block;
+    padding: 15px 96px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color:#ffcc00;
+    font-size: 16px;
+    color: #fff;
+}
+
+
+/**************** result_part css start ****************/
+.result_part {
+  margin-top: 9%;
+  margin-bottom: 8%;
+  margin-left: 10%;
+  margin-right: 10%;
+  text-align: center;
+}
+/**
+.result_pic{
+  margin: auto;
+  width: 600px;
+  height: 400px;
+  background-color: white;
+}
+
+.result_text{
+  margin-left: 20%;
+  margin-right: 20%;
+}
+*/
+/**************** footer part css start ****************/
+footer {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 2%;
+  padding: 2%;
+}

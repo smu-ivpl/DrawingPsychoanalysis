@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>Flask image get</title>
+	<link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <style>
+        body {
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body>
+<!--
+	<br>
+	<h1 align="center">Drawing Test</h1>
+	<br>
+	<form align="center" action="/det_post" method="POST" enctype="multipart/form-data">
+		<h2 align="center">Type</h2>
+		<table align="center">
+			<tr>
+				<td><input type="radio" name="options" value="tree">tree</td>
+				<td><input type="radio" name="options" value="cat">cat</td>
+			</tr>
+		</table>
+		<br><br>
+		<h2 align="center">Target Image</h2>
+		<div align="center" id='view_area'></div>
+		<br>
+		<input type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area')"/>
+		<input type="submit" value="확인"/>
+	</form>
+	<br><br><br>-->
+	<header class="main_menu home_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand" href="/index"> <img src="../static/img/Logo.png" height="30px"> </a>
+                        <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
+                            <ul class="navbar-nav" style="font-family: NEXON Lv2 Gothic Bold;">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/index">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#about">About</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_get">Cat Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_get2">Tree Test</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+	<section class="upload_part">
+			<h1 style="font-family: NEXON Lv2 Gothic Bold;">Cat Drawing Test</h1>
+			<br>
+			<form action="/det_post" method="POST" enctype="multipart/form-data">
+				<div id='view_area_cat'></div>
+				<br>
+				<div class="button-wrap">
+					<label class ="new-button" for="user_img"> Upload Drawing</label>
+					<input  type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area_cat')"/>
+					<label class ="new-button" for="submit_btn"> Start  CatTest</label>
+					<input type="submit" id="submit_btn"/>
+                    <input class="new-radio" type="radio" name="options" value="cat" checked>
+				</div>
+			</form>
+			</div>
+	</section>
+
+
+	<footer id = "footer">
+        <div style="text-align: center; line-height: 32px;">
+<!--            구본정, 장정인, 파올라-->
+            <a href="https://ivpl.sookmyung.ac.kr">
+                <img src="../static/img/ivpl_logo.png" style="width:150px">
+            </a>
+            <br>
+<!--            http://www.sookmyung.ac.kr/sookmyungkr/index.do-->
+        </div>
+    </footer>
+
+</body>
+
+<script type="text/javascript">
+	function previewImage(targetObj, view_area) {
+	var preview = document.getElementById(view_area);
+	var ua = window.navigator.userAgent;
+
+	var files = targetObj.files;
+	for ( var i = 0; i < files.length; i++) {
+		var file = files[i];
+		var imageType = /image.*/; //이미지 파일일경우만.. 뿌려준다.
+		if (!file.type.match(imageType))
+			continue;
+		var prevImg = document.getElementById("prev_" + view_area); //이전에 미리보기가 있다면 삭제
+		if (prevImg) {
+			preview.removeChild(prevImg);
+		}
+		var img = document.createElement("img");
+		img.id = "prev_" + view_area;
+		img.classList.add("obj");
+		img.file = file;
+		img.style.width = '600px';
+		img.style.height = '400px';
+		preview.appendChild(img);
+		if (window.FileReader) {
+			var reader = new FileReader();
+			reader.onloadend = (function(aImg) {
+				return function(e) {
+					aImg.src = e.target.result;
+				};
+			})(img);
+			reader.readAsDataURL(file);
+		} else {
+			if (!document.getElementById("sfr_preview_error_"
+					+ view_area)) {
+				var info = document.createElement("p");
+				info.id = "sfr_preview_error_" + view_area;
+				info.innerHTML = "not supported FileReader";
+				preview.insertBefore(info, null);
+			}
+		}
+	}
+}
+</script>
+
+</html>
