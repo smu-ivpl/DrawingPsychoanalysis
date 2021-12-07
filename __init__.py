@@ -19,7 +19,7 @@ th = Thread(target=detect, kwargs=args)
 th.start()
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 
 
 # Main page
@@ -84,9 +84,9 @@ def nst_post():
                                    td_1=detected_cat, td_2=detected_head, td_3=detected_body)
 
 
-if __name__ == "__main__":
-    # get port. Default to 8080
-    port = int(os.environ.get('PORT', 8080))
-
-    # run app
-    app.run(host='0.0.0.0', port=port)
+# if __name__ == "__main__":
+#     # get port. Default to 8080
+#     port = int(os.environ.get('PORT', 8080))
+#
+#     # run app
+#     app.run(host='0.0.0.0', port=port)
