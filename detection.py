@@ -99,10 +99,8 @@ class Detector(Process):
         # 3 classes
         self.cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
 
-        # Tree Model ===================================================================================================
-        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_tree/model_final.pth")
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
-        self.tree_model_default = DefaultPredictor(self.cfg)
+        self.detectron = DefaultPredictor(self.cfg)
+
         self.tree_model_crown_shape = keras.models.load_model(
             "model_pretrained/model_classification_tree/crown_shape_model.h5")
         self.tree_model_crown_shade = keras.models.load_model(
@@ -126,9 +124,6 @@ class Detector(Process):
         self.tree_model_low_branch = keras.models.load_model(
             "model_pretrained/model_classification_tree/low_branch_model.h5")
 
-        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_cat/model_final.pth")
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9  # set the testing threshold for this model
-        self.cat_model_default = DefaultPredictor(self.cfg)
         self.cat_model_concept = keras.models.load_model("model_pretrained/model_classification_cat/concept_model.h5")
         self.cat_model_movement = keras.models.load_model(
             "model_pretrained/model_classification_cat/movement_model.h5")
@@ -154,7 +149,11 @@ class Detector(Process):
         dest = img_dir.replace(os.path.basename(img_dir), '')
         path_list = {}
 
+        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_tree/model_final.pth")
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
         self.cfg.DATASETS.TEST = (img_dir,)
+        self.detectron = DefaultPredictor(self.cfg)
+
         test_metadata = MetadataCatalog.get(img_dir)
 
         # region Detection Part
@@ -163,7 +162,7 @@ class Detector(Process):
         filename = img_dir.split('/')[-1]
 
         im = cv2.imread(img_dir)
-        outputs = self.tree_model_default(im)
+        outputs = self.detectron(im)
         v = Visualizer(im[:, :, ::-1],
                        metadata=test_metadata,
                        scale=0.5
@@ -617,7 +616,10 @@ class Detector(Process):
         dest = img_dir.replace(os.path.basename(img_dir), '')
         path_list = {}
 
+        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_cat/model_final.pth")
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9  # set the testing threshold for this model
         self.cfg.DATASETS.TEST = (img_dir,)
+        self.detectron = DefaultPredictor(self.cfg)
         test_metadata = MetadataCatalog.get(img_dir)
 
         print("test cat!!!!!!!!")
@@ -627,7 +629,7 @@ class Detector(Process):
         im = cv2.imread(img_dir)
 
         # region Detection Part
-        outputs = self.cat_model_default(im)
+        outputs = self.detectron(im)
         v = Visualizer(im[:, :, ::-1],
                        metadata=test_metadata,
                        scale=0.5
