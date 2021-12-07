@@ -1,9 +1,7 @@
 model_pretrained/
-static/images/
-static/detected_tree_images/
-static/detected_cat_images/
-static/cropped_images/
-static/cat_plot_images/
+!model_pretrained/.gitkeep
+static/temporary/
+!static/temporary/.gitkeep
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,python
