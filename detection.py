@@ -83,7 +83,7 @@ class Detector(Process):
             env_path.replace("/bin/python",
                              "/lib/python3.7/site-packages/detectron2/model_zoo/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml")
         )
-        self.cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
+        # self.cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
         self.cfg.SOLVER.IMS_PER_BATCH = 2
 
         # Learning Rate
@@ -99,34 +99,17 @@ class Detector(Process):
         # 3 classes
         self.cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
 
-        self.detectron = DefaultPredictor(self.cfg)
-
-        self.tree_model_crown_shape = keras.models.load_model(
+        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_tree/model_final.pth")
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
+        self.tree_model_default = DefaultPredictor(self.cfg)
+        self.tree_model_sentence = keras.models.load_model(
             "model_pretrained/model_classification_tree/crown_shape_model.h5")
-        self.tree_model_crown_shade = keras.models.load_model(
-            "model_pretrained/model_classification_tree/crown_shade_model.h5")
-        self.tree_model_crown_fruit = keras.models.load_model(
-            "model_pretrained/model_classification_tree/fruit_model.h5")
-        self.tree_model_cut_branch = keras.models.load_model(
-            "model_pretrained/model_classification_tree/cut_branch_model.h5")
-        self.tree_model_trunk_shape = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_shape_model.h5")
-        self.tree_model_trunk_wave = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_wave_model.h5")
-        self.tree_model_trunk_lines = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_lines_model.h5")
-        self.tree_model_trunk_shade = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_shade_model.h5")
-        self.tree_model_trunk_tilt = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_tilt_model.h5")
-        self.tree_model_trunk_pattern = keras.models.load_model(
-            "model_pretrained/model_classification_tree/trunk_pattern_model.h5")
-        self.tree_model_low_branch = keras.models.load_model(
-            "model_pretrained/model_classification_tree/low_branch_model.h5")
 
-        self.cat_model_concept = keras.models.load_model("model_pretrained/model_classification_cat/concept_model.h5")
-        self.cat_model_movement = keras.models.load_model(
-            "model_pretrained/model_classification_cat/movement_model.h5")
+        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_cat/model_final.pth")
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9  # set the testing threshold for this model
+        self.cat_model_default = DefaultPredictor(self.cfg)
+        self.cat_model_sentence = keras.models.load_model(
+            "model_pretrained/model_classification_cat/concept_model.h5")
 
     def register(self, file_dir):
         print("Register!")
@@ -149,11 +132,7 @@ class Detector(Process):
         dest = img_dir.replace(os.path.basename(img_dir), '')
         path_list = {}
 
-        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_tree/model_final.pth")
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
         self.cfg.DATASETS.TEST = (img_dir,)
-        self.detectron = DefaultPredictor(self.cfg)
-
         test_metadata = MetadataCatalog.get(img_dir)
 
         # region Detection Part
@@ -162,7 +141,7 @@ class Detector(Process):
         filename = img_dir.split('/')[-1]
 
         im = cv2.imread(img_dir)
-        outputs = self.detectron(im)
+        outputs = self.tree_model_default(im)
         v = Visualizer(im[:, :, ::-1],
                        metadata=test_metadata,
                        scale=0.5
@@ -304,7 +283,11 @@ class Detector(Process):
         # endregion
 
         # region Class: crown shape
-        pred = self.tree_model_crown_shape.predict(bottle_resized)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/crown_shape_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/crown_shape_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
             attr1 = "관"
@@ -336,7 +319,12 @@ class Detector(Process):
         # endregion
 
         # region Class: crown shade
-        pred = self.tree_model_crown_shade.predict(bottle_resized)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/crown_shade_model.h5")
+        keras.Model.load_weights(
+            self.tree_model_sentence,
+            "model_pretrained/model_classification_tree/crown_shade_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1]:
             attr1 = "관"
@@ -355,7 +343,12 @@ class Detector(Process):
         # endregion
 
         # region Class: crown fruit
-        pred = self.tree_model_crown_fruit.predict(bottle_resized)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/fruit_model.h5")
+        keras.Model.load_weights(
+            self.tree_model_sentence,
+            "model_pretrained/model_classification_tree/fruit_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1]:
             attr1 = "관"
@@ -370,7 +363,11 @@ class Detector(Process):
         # endregion
 
         # region Class: cut branch
-        pred = self.tree_model_cut_branch.predict(bottle_resized)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/cut_branch_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/cut_branch_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1]:
             attr1 = "가지"
@@ -394,7 +391,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk shape
-        pred = self.tree_model_trunk_shape.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_shape_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_shape_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1]:
             # attr = "Trunk base: "
@@ -428,7 +429,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk wave
-        pred = self.tree_model_trunk_wave.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_wave_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_wave_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1]:
             attr1 = "나무기둥"
@@ -447,7 +452,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk lines
-        pred = self.tree_model_trunk_lines.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_lines_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_lines_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1]:
             attr1 = "나무기둥"
@@ -466,7 +475,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk shade
-        pred = self.tree_model_trunk_shade.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_shade_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_shade_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2] and pred[0, 0] > pred[0, 3]:
             # attr = "Trunk full shade: "
@@ -515,7 +528,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk tilt
-        pred = self.tree_model_trunk_tilt.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_tilt_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_tilt_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
             # attr = "Trunk right tilt: "
@@ -549,7 +566,11 @@ class Detector(Process):
         # endregion
 
         # region Class: trunk pattern
-        pred = self.tree_model_trunk_pattern.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/trunk_pattern_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/trunk_pattern_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 1] > pred[0, 0] and pred[0, 1] > pred[0, 2]:
             # attr = "Trunk round pattern: "
@@ -583,7 +604,11 @@ class Detector(Process):
         # endregion
 
         # region Class: low branch
-        pred = self.tree_model_low_branch.predict(bottle_resized2)
+        # tree_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_tree/low_branch_model.h5")
+        keras.Model.load_weights(self.tree_model_sentence,
+                                 "model_pretrained/model_classification_tree/low_branch_model.h5")
+        pred = self.tree_model_sentence.predict(bottle_resized2)
 
         if pred[0, 0] > pred[0, 1]:
             # attr = "Low branch: "
@@ -616,10 +641,7 @@ class Detector(Process):
         dest = img_dir.replace(os.path.basename(img_dir), '')
         path_list = {}
 
-        self.cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_cat/model_final.pth")
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9  # set the testing threshold for this model
         self.cfg.DATASETS.TEST = (img_dir,)
-        self.detectron = DefaultPredictor(self.cfg)
         test_metadata = MetadataCatalog.get(img_dir)
 
         print("test cat!!!!!!!!")
@@ -629,7 +651,7 @@ class Detector(Process):
         im = cv2.imread(img_dir)
 
         # region Detection Part
-        outputs = self.detectron(im)
+        outputs = self.cat_model_default(im)
         v = Visualizer(im[:, :, ::-1],
                        metadata=test_metadata,
                        scale=0.5
@@ -695,7 +717,9 @@ class Detector(Process):
         bottle_resized = np.expand_dims(bottle_resized, axis=0)
 
         # region Class: conceptual
-        pred = self.cat_model_concept.predict(bottle_resized)
+        # cat_model = keras.models.load_model("model_pretrained/model_classification_cat/concept_model.h5")
+        keras.Model.load_weights(self.cat_model_sentence, "model_pretrained/model_classification_cat/concept_model.h5")
+        pred = self.cat_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1]:
             print("RIGHT HEMISPHERE")
@@ -706,7 +730,11 @@ class Detector(Process):
         # endregion
 
         # region Class: movement
-        pred = self.cat_model_movement.predict(bottle_resized)
+        # cat_model = keras.models.load_model(
+        #     "model_pretrained/model_classification_cat/movement_model.h5")
+        keras.Model.load_weights(self.cat_model_sentence,
+                                 "model_pretrained/model_classification_cat/movement_model.h5")
+        pred = self.cat_model_sentence.predict(bottle_resized)
 
         if pred[0, 0] > pred[0, 1]:
             print("LEFT HEMISPHERE")

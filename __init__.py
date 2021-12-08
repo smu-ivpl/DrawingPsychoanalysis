@@ -3,9 +3,11 @@ import time
 
 from flask import Flask, request
 from flask.templating import render_template
-
 from detection import Detector, ImageQue, detect
 from threading import Thread, Event
+
+app = Flask(__name__)
+app.debug = False
 
 args = {}
 
@@ -17,10 +19,6 @@ args['detector'] = Detector()
 
 th = Thread(target=detect, kwargs=args)
 th.start()
-
-app = Flask(__name__)
-app.debug = False
-
 
 # Main page
 @app.route('/')
@@ -82,7 +80,6 @@ def nst_post():
             return render_template('det_post.html', user_img=detected_cat_img, user_result=cat_result, user_url=cat_plot
                                    , th_1='Cat', th_2='Head', th_3='Body',
                                    td_1=detected_cat, td_2=detected_head, td_3=detected_body)
-
 
 # if __name__ == "__main__":
 #     # get port. Default to 8080
