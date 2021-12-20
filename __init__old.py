@@ -3,7 +3,7 @@ import time
 
 from flask import Flask, request
 from flask.templating import render_template
-from detection import Detector, ImageQue, detect
+# from detection_old import Detector, ImageQue, detect
 from threading import Thread, Event
 
 app = Flask(__name__)
