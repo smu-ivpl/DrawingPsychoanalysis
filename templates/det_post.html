@@ -54,15 +54,15 @@
                 <table align="center">
                     <tr>
                         <th>Detected Result</th>
-                        <th>{{th_1}}</th>
-                        <th>{{th_2}}</th>
-                        <th>{{th_3}}</th>
+                        {% for my_tr in my_tr_list  %}
+                            <th>{{ my_tr }}</th>
+                        {% endfor %}
                     </tr>
                     <tr>
                         <td><img align="center" class=det_img src="{{user_img}}" h></td>
-                        <td><img align="center" class=det_img src="{{td_1}}"></td>
-                        <td><img align="center" class=det_img src="{{td_2}}"></td>
-                        <td><img align="center" class=det_img src="{{td_3}}"></td>
+                        {% for my_td in my_td_list %}
+                            <td><img align="center" class=det_img src="{{my_td}}"></td>
+                        {% endfor %}
                      </tr>
                 </table>
             </div>

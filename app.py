@@ -51,25 +51,16 @@ def nst_post():
         #     pass
 
         if option == "tree":
-            # det = detection.Detector()
-            # for tree test
-            detected_branch, detected_trunk, detected_root, detected_tree_img, tree_result = test_tree(detector['tree'], user_img_path)
-            # (detected_branch, detected_trunk, detected_root, detected_tree_img, tree_result) = args['out_buf'].get()
+            path_details, path_detected, final_sentence = test_tree(detector['tree'], user_img_path)
 
-            return render_template('det_post.html', user_img=detected_tree_img, user_result=tree_result, user_url=""
-                                   , th_1='Branches', th_2='Trunk', th_3='Root',
-                                   td_1=detected_branch, td_2=detected_trunk, td_3=detected_root)
+            return render_template('det_post.html', user_img=path_detected, user_result=final_sentence,
+                                   my_tr_list=path_details.keys(), my_td_list=path_details.values())
 
         elif option == "cat":
-            # det = detection.Detector()
-            # for cat test
-            detected_cat, detected_head, detected_body, detected_cat_img, cat_result, cat_plot = test_cat(detector['cat'], user_img_path)
-            # result = args['out_buf'].get()
-            # print(result)
-            # (detected_cat, detected_head, detected_body, detected_cat_img, cat_result, cat_plot) = result
-            return render_template('det_post.html', user_img=detected_cat_img, user_result=cat_result, user_url=cat_plot
-                                   , th_1='Cat', th_2='Head', th_3='Body',
-                                   td_1=detected_cat, td_2=detected_head, td_3=detected_body)
+            path_details, path_detected, path_plot, result_str = test_cat(detector['cat'], user_img_path)
+
+            return render_template('det_post.html', user_img=path_detected, user_url=path_plot, user_result=result_str,
+                                   my_tr_list=path_details.keys(), my_td_list=path_details.values())
 
 if __name__ == "__main__":
     # get port. Default to 8080

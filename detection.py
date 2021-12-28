@@ -24,11 +24,8 @@ def init():
 
     import shutil
     env_path = shutil.which('python')
-    cfg.merge_from_file(
-        # "/home/jang/anaconda3/envs/drawing_env/lib/python3.7/site-packages/detectron2/model_zoo/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
-        env_path.replace("/bin/python",
-                         "/lib/python3.7/site-packages/detectron2/model_zoo/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml")
-    )
+    cfg.merge_from_file(env_path.replace("/bin/python",
+        "/lib/python3.7/site-packages/detectron2/model_zoo/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"))
     cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
 
@@ -147,7 +144,7 @@ def test_tree(models, img_dir):
     :return: branch image, trunk image, root image, tree image with detected region , result sentence
     """
     dest = img_dir.replace(os.path.basename(img_dir), '')
-    path_list = {}
+    path_details = {}
 
     models['default'].cfg.DATASETS.TEST = (img_dir,)
 
@@ -169,8 +166,8 @@ def test_tree(models, img_dir):
     # Fix tree image size: 350x600
     resized_img = cv2.resize(out.get_image()[:, :, ::-1], dsize=(350, 600), interpolation=cv2.INTER_AREA)
     name = "{}_{}.jpg".format(filename.split('.')[0], "detected")
-    path_list['detected'] = os.path.join(dest, name)
-    cv2.imwrite(path_list['detected'], resized_img)
+    path_detected = os.path.join(dest, name)
+    cv2.imwrite(path_detected, resized_img)
 
     # Analyzing if there's a lot of space in the image
     # 1. Convert image to GRAYSCALE
@@ -271,8 +268,8 @@ def test_tree(models, img_dir):
 
         detected_file = cv2.resize(crop_img, dim, interpolation=cv2.INTER_AREA)
         name = "{}_{}.jpg".format(filename.split('.')[0], k)
-        path_list[k] = os.path.join(dest, name)
-        cv2.imwrite(path_list[k], detected_file)
+        path_details[k] = os.path.join(dest, name)
+        cv2.imwrite(path_details[k], detected_file)
         img_array.append(crop_img)
 
     # From this line, we get image attributes with classification models
@@ -610,7 +607,7 @@ def test_tree(models, img_dir):
         final_sentence = final_sentence + sentence11 + "\r\n"
     # endregion
 
-    return path_list['branches'], path_list['trunk'], path_list['roots'], path_list['detected'], final_sentence
+    return path_details, path_detected, final_sentence
 
 
 def test_cat(models, img_dir):
@@ -623,7 +620,7 @@ def test_cat(models, img_dir):
         :return: cat image, trunk image, head image, body image with detected region, result sentence
         """
     dest = img_dir.replace(os.path.basename(img_dir), '')
-    path_list = {}
+    path_details = {}
 
     models['default'].cfg.DATASETS.TEST = (img_dir,)
     test_metadata = MetadataCatalog.get(img_dir)
@@ -645,8 +642,8 @@ def test_cat(models, img_dir):
     # Fix cat image size: (560, 400)
     resized_img = cv2.resize(out.get_image()[:, :, ::-1], dsize=(560, 400), interpolation=cv2.INTER_AREA)
     name = "{}_{}.jpg".format(filename.split('.')[0], "detected")
-    path_list['detected'] = os.path.join(dest, name)
-    cv2.imwrite(path_list['detected'], resized_img)
+    path_detected = os.path.join(dest, name)
+    cv2.imwrite(path_detected, resized_img)
 
     boxes = {}
     array = []
@@ -685,8 +682,8 @@ def test_cat(models, img_dir):
 
         resized_img = cv2.resize(crop_img, dim, interpolation=cv2.INTER_AREA)
         name = "{}_{}.jpg".format(filename.split('.')[0], k)
-        path_list[k] = os.path.join(dest, name)
-        cv2.imwrite(path_list[k], resized_img)
+        path_details[k] = os.path.join(dest, name)
+        cv2.imwrite(path_details[k], resized_img)
 
     # endregion
 
@@ -749,22 +746,23 @@ def test_cat(models, img_dir):
             textprops={'fontsize': 14})  # text font size
 
     name = "{}_{}.jpg".format(filename.split('.')[0], "plot")
-    path_list['plot'] = os.path.join(dest, name)
+    path_plot = os.path.join(dest, name)
 
     plt.axis('equal')  # equal length of X and Y axis
     plt.title('Your brain is?', fontsize=20)
-    plt.savefig(path_list['plot'])
+    plt.savefig(path_plot)
 
     # plt.show()
     plt.close()
 
     # Done! Return images, pie graph and result sentence
-    result = ""
+    final_sentence = ""
     if right > left:
-        result = "당신은 우뇌입니다"
+        final_sentence = "당신은 우뇌입니다"
     elif left > right:
-        result = "당신은 좌뇌입니다"
+        final_sentence = "당신은 좌뇌입니다"
 
     # endregion
 
-    return path_list['cat'], path_list['head'], path_list['body'], path_list['detected'], result, path_list['plot']
+    # return path_list['cat'], path_list['head'], path_list['body'], path_detected, result, path_plot
+    return path_details, path_detected, path_plot, final_sentence
