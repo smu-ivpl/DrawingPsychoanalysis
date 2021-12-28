@@ -24,7 +24,7 @@
                                     <a class="nav-link" href="/index">Home</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#about">About</a>
+                                    <a class="nav-link" href="/index#about">About</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/det_get">Cat Test</a>
@@ -50,7 +50,7 @@
 					<label class ="new-button" for="user_img"> Upload Drawing</label>
 					<input  type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area_tree')"/>
 					<label class ="new-button" for="submit_btn"> Start TreeTest</label>
-					<input type="submit" id="submit_btn"/>
+					<input type="submit" id="submit_btn" disabled="disabled"/>
                     <input class="new-radio" type="radio" name="options" value="tree" checked>
 				</div>
 			</form>
@@ -110,6 +110,8 @@
 			}
 		}
 	}
+    const btn = document.getElementById("submit_btn");
+    btn.disabled = false;
 }
 </script>
 </html>
