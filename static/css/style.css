@@ -56,13 +56,13 @@ option{
 }
 
 .main_menu .main-menu-item {
-  padding-left: 500px;
+  padding-left: 200px;
 }
 
 
 .main_menu .main-menu-item ul li .nav-link {
   margin: 10px;
-  width: 120px;
+  width: 150px;
   color:ivory;
   font-size: 20px;
   font-weight: bold;

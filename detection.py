@@ -48,6 +48,7 @@ def init():
     models = {}
     models['tree'] = {}
     models['cat'] = {}
+    models['life'] = {}
 
     models['tree']['default'] = DefaultPredictor(cfg)
 
@@ -81,6 +82,11 @@ def init():
     models['cat']['concept'] = keras.models.load_model("model_pretrained/model_classification_cat/concept_model.h5")
     models['cat']['movement'] = keras.models.load_model(
         "model_pretrained/model_classification_cat/movement_model.h5")
+
+    # cfg.MODEL.WEIGHTS = "./model_pretrained/model_life_space/best_accuracy.pth"
+    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9
+
+    # models['life']['default'] = keras.models.load_model("model_pretrained/model_life_space/mask_rcnn_text_0001.h5")
 
     return models
 
@@ -134,15 +140,11 @@ def image_colorfulness(image):
     return std_root + (0.3 * mean_root)
 
 
+def test_life_space(models, img_dir):
+    pass
+
+
 def test_tree(models, img_dir):
-    """
-    Test tree image with models.
-    1. Detect regions (branches, trunk, root)
-    2. Crop and classify with classification model
-    3. Get image attributes
-    :param img_dir: image from web page
-    :return: branch image, trunk image, root image, tree image with detected region , result sentence
-    """
     dest = img_dir.replace(os.path.basename(img_dir), '')
     path_details = {}
 
@@ -169,9 +171,6 @@ def test_tree(models, img_dir):
     path_detected = os.path.join(dest, name)
     cv2.imwrite(path_detected, resized_img)
 
-    # Analyzing if there's a lot of space in the image
-    # 1. Convert image to GRAYSCALE
-    # 2. Count pixel value
     img1 = cv2.cvtColor(im, cv2.IMREAD_GRAYSCALE)
 
     scale_percent = 50
@@ -182,51 +181,19 @@ def test_tree(models, img_dir):
 
     print('Resized Dimensions : ', img.shape)
 
-    # total = img.shape[0] * img.shape[1]
-    # print(total)
-
-    # x1 = img.shape[0] / 5
-    # x2 = img.shape[0] - x1
     y1 = img.shape[1] / 5
     y2 = img.shape[1] - y1
 
-    # total = x1 * img.shape[1]
-    # count = getWhitePercent(img, total, 0, x1, 0, img.shape[1])
-    # count = getWhitePercent(img, total, x2, img.shape[0], 0, img.shape[1])
-
     total = y1 * img.shape[0]
-    # count = getWhitePercent(img, total, 0, img.shape[0], 0, y1)
     count = getWhitePercent(img, total, 0, img.shape[0], y2, img.shape[1])
 
     if count >= 3:
-        print('image is dense')
-        attr1 = "공간 밀도"
-        attr2 = "꽉찬"
-        adj1 = "근면하고"
-        adj2 = "본능에 끌리지 않고"
-        adj3 = "갇힌 감정 상태"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence00 = adj_sentence(attr1, attr2, adj, adj3)
-
+        results = "꽉 찬 공간밀도, "
     else:
-        print('image is empty')
-        attr1 = "공간 밀도"
-        attr2 = "비어있는"
-        adj1 = "민감하고"
-        adj2 = "겸손하고"
-        adj3 = "정신적으로 어떻게 행동해야 할지 모르는 상태"
+        results = "비어있는 공간밀도, "
 
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence00 = adj_sentence(attr1, attr2, adj1, adj3)
-
-    # The last sentence to be returned
-    # Can see this 'final_sentence' through web
-    final_sentence = sentence00 + "\r\n"
+    # final_sentence = sentence00 + "\r\n"
+    final_sentence = results
 
     boxes = {}
     array = []
@@ -253,15 +220,12 @@ def test_tree(models, img_dir):
     for i in range(len(label_array)):
         boxes[label_array[i]] = array[i]
 
-    # {'branches': [623, 826, 2086, 1853], 'trunk': [1075, 1796, 1459, 2269], 'roots': [733, 2228, 1549, 2439]}
     print("STEP1 BOXES: ", boxes)
 
     # Crop Image
     img_array = []
     for k, v in boxes.items():
         crop_img = im[v[1]:v[3], v[0]:v[2], :]
-        # plt.imshow(crop_img, interpolation='nearest')
-        # plt.show()
 
         ratio = 350.0 / crop_img.shape[1]
         dim = (350, int(crop_img.shape[0] * ratio))
@@ -272,25 +236,10 @@ def test_tree(models, img_dir):
         cv2.imwrite(path_details[k], detected_file)
         img_array.append(crop_img)
 
-    # From this line, we get image attributes with classification models
-
-    # First, check if there is 'root'
-    # print("IMG_ARRAY LEN", len(img_array))  # 3(if root exists), 2(if root does not exist)
     if len(img_array) == 3:
-        attr1 = "뿌리"
-        attr2 = "뿌리가 보이는 상태인"
-        adj1 = "원시성이 있고"
-        adj2 = "전통과의 결부가 보여지고"
-        adj3 = "정확성"
+        sentence0 = "뿌리 보임, "
+        final_sentence = final_sentence + sentence0
 
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence0 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence0 + "\r\n"
-
-    # Second, check tree attributes for branches(crown)
     img = img_array[0]
 
     bottle_resized = resize(img, (224, 224))
@@ -301,33 +250,12 @@ def test_tree(models, img_dir):
     print("tree_model_crown_shape")
     pred = models['crown_shape'].predict(bottle_resized)
 
+    crown_str = "왕관: "
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
-        attr1 = "관"
-        attr2 = "아케이드 모양인"
-
-        adj1 = "감수성이 있고"
-        adj2 = "예의 바르고"
-        adj3 = "의무감"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence1 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence1 + "\r\n"
+        crown_str += "아케이드 모양, "
 
     elif pred[0, 1] > pred[0, 2]:
-        attr1 = "관"
-        attr2 = "공 모양인"
-
-        adj1 = "에너지가 부족하고"
-        adj2 = "구성 감각이 결여되어있고"
-        adj3 = "텅빈 마음"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence1 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence1 + "\r\n"
+        crown_str += "공 모양, "
     # endregion
 
     # region Class: crown shade
@@ -335,19 +263,7 @@ def test_tree(models, img_dir):
     pred = models['crown_shade'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        attr1 = "관"
-        attr2 = "그림자 진"
-
-        adj1 = "분위기에 좌우되고"
-        adj2 = "정확성의 결여되어있고"
-        adj3 = "부드러움"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence2 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence2 + "\r\n"
+        crown_str += "그림자 진, "
     # endregion
 
     # region Class: crown fruit
@@ -355,35 +271,18 @@ def test_tree(models, img_dir):
     pred = models['crown_fruit'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        attr1 = "관"
-        attr2 = "과일이 매달려 있는"
-        adj1 = "발달이 지체되어있고"
-        adj2 = "자기 표현 능력이 결여되어있고"
-        adj3 = "독립심의 결여"
-
-        sentence3 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence3 + "\r\n"
+        crown_str += "과일 달린, "
     # endregion
+
+    if crown_str != "왕관: ":
+        final_sentence += crown_str
 
     # region Class: cut branch
     print("tree_model_cut_branch")
     pred = models['cut_branch'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        attr1 = "가지"
-        attr2 = "잘려있는"
-
-        adj1 = "살려는 의지가 있고"
-        adj2 = "억제되어있고"
-        adj3 = "저항력"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence4 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence4 + "\r\n"
+        final_sentence += "잘린 나뭇가지, "
 
     # Last, check tree attributes for trunk
     img2 = img_array[1]
@@ -395,35 +294,11 @@ def test_tree(models, img_dir):
     print("tree_model_trunk_shape")
     pred = models['trunk_shape'].predict(bottle_resized2)
 
+    trunk_str = "나무기둥: "
     if pred[0, 0] > pred[0, 1]:
-        # attr = "Trunk base: "
-        attr1 = "나무기둥"
-        attr2 = "양쪽으로 넓은 모양인"
-
-        adj1 = "봉쇄적 사고가 있고"
-        adj2 = "이해가 느리고"
-        adj3 = "학습곤란"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence5 = adj_sentence(attr1, attr2, adj, adj3)
-
+        trunk_str += "양쪽으로 넓은, "
     else:
-        attr1 = "나무기둥"
-        attr2 = "직선적인 모양인"
-
-        adj1 = "규범적이고"
-        adj2 = "고집이 세고"
-        adj3 = "냉정함"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence5 = adj_sentence(attr1, attr2, adj, adj3)
-
-    if sentence5:
-        final_sentence = final_sentence + sentence5 + "\r\n"
+        trunk_str += "직선 모양의, "
     # endregion
 
     # region Class: trunk wave
@@ -431,19 +306,7 @@ def test_tree(models, img_dir):
     pred = models['trunk_wave'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        attr1 = "나무기둥"
-        attr2 = "구불거리는 모양인"
-
-        adj1 = "생동감이 있는"
-        adj2 = "적응력이 큰"
-        adj3 = "생기"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence6 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence6 + "\r\n"
+        trunk_str += "구불거리는 형태의, "
     # endregion
 
     # region Class: trunk lines
@@ -451,19 +314,7 @@ def test_tree(models, img_dir):
     pred = models['trunk_lines'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        attr1 = "나무기둥"
-        attr2 = "흩어진 선으로 이루어진"
-
-        adj1 = "예민하고"
-        adj2 = "감정이입을 강하게 하는 경향이 있고"
-        adj3 = "민감성"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence7 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence7 + "\r\n"
+        trunk_str += "흩어진 선으로 된, "
     # endregion
 
     # region Class: trunk shade
@@ -471,49 +322,11 @@ def test_tree(models, img_dir):
     pred = models['trunk_shade'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2] and pred[0, 0] > pred[0, 3]:
-        # attr = "Trunk full shade: "
-        attr1 = "나무기둥"
-        attr2 = "전체에 명암이 있는"
-
-        adj1 = "수동적이고"
-        adj2 = "강박적이고"
-        adj3 = "불안정감"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence8 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence8 + "\r\n"
-
+        trunk_str += "전체 명암이 있는, "
     elif pred[0, 1] > pred[0, 2] and pred[0, 1] > pred[0, 0] and pred[0, 1] > pred[0, 3]:
-        # attr = "Trunk right shade: "
-        attr1 = "나무기둥"
-        attr2 = "오른쪽에 그림자가 있는"
-
-        adj1 = "접촉할 능력이 있고"
-        adj2 = "접촉할 능력이 있고"
-        adj3 = "적응력"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence8 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence8 + "\r\n"
-
+        trunk_str += "우측의 그림자, "
     elif pred[0, 2] > pred[0, 0] and pred[0, 2] > pred[0, 1] and pred[0, 2] > pred[0, 3]:
-        # attr = "Trunk left shade: "
-        attr1 = "나무기둥"
-        attr2 = "왼쪽에 그림자가 있는"
-
-        adj1 = "외향적이고"
-        adj2 = "억제하는 경향이 있고"
-        adj3 = "민감성"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence8 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence8 + "\r\n"
+        trunk_str += "좌측의 그림자, "
     # endregion
 
     # region Class: trunk tilt
@@ -521,34 +334,9 @@ def test_tree(models, img_dir):
     pred = models['trunk_tilt'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
-        # attr = "Trunk right tilt: "
-        attr1 = "나무기둥"
-        attr2 = "오른쪽으로 기울어진"
-
-        adj1 = "집중을 잘하고"
-        adj2 = "유혹에 빠지기 쉽고"
-        adj3 = "민감성"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence9 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence9 + "\r\n"
-
+        trunk_str += "우측으로 기울어진, "
     elif pred[0, 1] > pred[0, 2]:
-        # attr = "Trunk left tilt: "
-        attr1 = "나무기둥"
-        attr2 = "왼쪽으로 기울어진"
-
-        adj1 = "도전적이고"
-        adj2 = "감정을 억누르는 경향이 있고"
-        adj3 = "방어적 태도"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence9 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence9 + "\n"
+        trunk_str += "좌측으로 기울어진, "
     # endregion
 
     # region Class: trunk pattern
@@ -556,34 +344,9 @@ def test_tree(models, img_dir):
     pred = models['trunk_pattern'].predict(bottle_resized2)
 
     if pred[0, 1] > pred[0, 0] and pred[0, 1] > pred[0, 2]:
-        # attr = "Trunk round pattern: "
-        attr1 = "나무기둥"
-        attr2 = "둥근 나무 껍질 무늬가 있는"
-
-        adj1 = "접촉을 위한 준비 능력이 있고"
-        adj2 = "접촉을 위한 준비 능력이 있고"
-        adj3 = "자발적 적응 능력"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence10 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence10 + "\r\n"
-
+        trunk_str += "둥근 껍질 무늬, "
     elif pred[0, 2] > pred[0, 1]:
-        # attr = "Trunk scratch pattern: "
-        attr1 = "나무기둥"
-        attr2 = "긁힌 모양의 무늬가 있는"
-
-        adj1 = "냉정하고"
-        adj2 = "규범적이고"
-        adj3 = "센 고집"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence10 = adj_sentence(attr1, attr2, adj, adj3)
-        final_sentence = final_sentence + sentence10 + "\n"
+        trunk_str += "긁힌 무늬, "
     # endregion
 
     # region Class: low branch
@@ -591,21 +354,11 @@ def test_tree(models, img_dir):
     pred = models['low_branch'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        # attr = "Low branch: "
-        attr1 = "나무기둥"
-        attr2 = "가지가 있는"
-
-        adj1 = "신뢰성이 없고"
-        adj2 = "행동이 어린 아이 같고"
-        adj3 = "부분적 발달 억제"
-
-        adj_list = [adj1, adj2]
-        adj = random.choice(adj_list)
-
-        sentence11 = adj_sentence(attr1, attr2, adj, adj3)
-
-        final_sentence = final_sentence + sentence11 + "\r\n"
+        trunk_str += "가지가 있는, "
     # endregion
+
+    if trunk_str != "나무기둥: ":
+        final_sentence += trunk_str
 
     return path_details, path_detected, final_sentence
 
