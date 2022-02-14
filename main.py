@@ -70,7 +70,7 @@ def train_tree_detection():
     cfg.DATASETS.TRAIN = ("train_dataset",)
     cfg.DATASETS.TEST = ()  # no metrics implemented for this dataset
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
+    cfg.MODEL.WEIGHTS = "ckpt/model_final_f6e8b1.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.0005
     cfg.SOLVER.MAX_ITER = 1000
@@ -273,7 +273,7 @@ def train_cat_detection():
     cfg.DATASETS.TRAIN = ("train_dataset2",)
     cfg.DATASETS.TEST = ()  # no metrics implemented for this dataset
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
+    cfg.MODEL.WEIGHTS = "ckpt/model_final_f6e8b1.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.0005
     cfg.SOLVER.MAX_ITER = 1000

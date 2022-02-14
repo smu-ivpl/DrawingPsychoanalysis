@@ -21,14 +21,19 @@ def return_index():
     return render_template('index.html')
 
 
-@app.route('/det_get')
-def nst_get():
-    return render_template('det_get.html')
+@app.route('/det_cat')
+def nst_cat():
+    return render_template('det_cat.html')
 
 
-@app.route('/det_get2')
-def nst_get2():
-    return render_template('det_get2.html')
+@app.route('/det_tree')
+def nst_tree():
+    return render_template('det_tree.html')
+
+
+@app.route('/det_life')
+def nst_life():
+    return render_template('det_life.html')
 
 
 @app.route('/det_post', methods=['GET', 'POST'])
@@ -54,6 +59,9 @@ def nst_post():
 
             return render_template('det_post.html', user_img=path_detected, user_result=final_sentence,
                                    my_tr_list=path_details.keys(), my_td_list=path_details.values())
+        if option == "life":
+            results = test_life(detector['life'], user_img_path)
+            return render_template('det_post.html', my_tr_list=results.keys(), my_td_list=results.values())
 
 if __name__ == "__main__":
     # get port. Default to 8080

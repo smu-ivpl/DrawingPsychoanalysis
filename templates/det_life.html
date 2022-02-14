@@ -27,10 +27,13 @@
                                     <a class="nav-link" href="/index#about">About</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get">Cat Test</a>
+                                    <a class="nav-link" href="/det_cat">Cat Test</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get2">Tree Test</a>
+                                    <a class="nav-link" href="/det_tree">Tree Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_life">Life Space</a>
                                 </li>
                             </ul>
                         </div>
@@ -41,17 +44,17 @@
     </header>
 
 	<section class="upload_part">
-			<h1 style="font-family: NEXON Lv2 Gothic Bold;">Tree Drawing Test</h1>
+			<h1 style="font-family: NEXON Lv2 Gothic Bold;">Life Space Drawing Test</h1>
 			<br>
 			<form action="/det_post" method="POST" enctype="multipart/form-data">
-				<div id='view_area_tree'></div>
+				<div id='view_area_life'></div>
 				<br>
 				<div class="button-wrap">
 					<label class ="new-button" for="user_img"> Upload Drawing</label>
-					<input  type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area_tree')"/>
-					<label class ="new-button" for="submit_btn"> Start TreeTest</label>
+					<input  type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area_life')"/>
+					<label class ="new-button" for="submit_btn"> Start LifeTest</label>
 					<input type="submit" id="submit_btn" disabled="disabled"/>
-                    <input class="new-radio" type="radio" name="options" value="tree" checked>
+                    <input class="new-radio" type="radio" name="options" value="life" checked>
 				</div>
 			</form>
 			</div>
@@ -60,12 +63,10 @@
 	
 	<footer id = "footer"> 
         <div style="text-align: center; line-height: 32px;">
-<!--            구본정, 장정인, 파올라-->
             <a href="https://ivpl.sookmyung.ac.kr">
                 <img src="../static/img/ivpl_logo.png" style="width:150px">
             </a>
             <br>
-<!--            http://www.sookmyung.ac.kr/sookmyungkr/index.do-->
         </div>
     </footer> 
 </body>

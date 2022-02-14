@@ -33,10 +33,13 @@
                                     <a class="nav-link" href="/index#about">About</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get">Cat Test</a>
+                                    <a class="nav-link" href="/det_cat">Cat Test</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get2">Tree Test</a>
+                                    <a class="nav-link" href="/det_tree">Tree Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_life">Life Space</a>
                                 </li>
                             </ul>
                         </div>
@@ -51,36 +54,32 @@
 
         <div class="centerDiv" >
             <div class="result_table">
-                <table align="center">
+                <table align="center" style="table-layout: fixed">
                     <tr>
-                        <th>Detected Result</th>
                         {% for my_tr in my_tr_list  %}
-                            <th>{{ my_tr }}</th>
+                            <th style="width: 600px; max-width: 600px">{{ my_tr }}</th>
                         {% endfor %}
                     </tr>
                     <tr>
-                        <td><img align="center" class=det_img src="{{user_img}}" h></td>
                         {% for my_td in my_td_list %}
-                            <td><img align="center" class=det_img src="{{my_td}}"></td>
+                            <td><img style="width: 100%; height: auto" align="center" class=det_img src="{{my_td}}"></td>
                         {% endfor %}
                      </tr>
                 </table>
             </div>
-            <div class="result_text" style="line-height: 32px;  ">
+            <div class="result_text" style="line-height: 32px; font-size: 14px">
                 <br> {{user_result}}
-                <img align="center" class=det_img src="{{user_url}}" >
             </div>
+            <img align="center" class=det_img src="{{user_url}}" >
         </div>
 	</section>
 
 	<footer id = "footer">
         <div style="text-align: center; line-height: 32px;">
-<!--            구본정, 장정인, 파올라-->
             <a href="https://ivpl.sookmyung.ac.kr">
                 <img src="../static/img/ivpl_logo.png" style="width:150px">
             </a>
             <br>
-<!--            http://www.sookmyung.ac.kr/sookmyungkr/index.do-->
         </div>
     </footer>
 </body>

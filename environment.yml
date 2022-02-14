@@ -1,30 +1,42 @@
-name: drawing_env
+name: drawing_env2
 channels:
   - pytorch
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
-  - cudatoolkit=10.1
-  - flask
-  - hdf5=1.10.2
-  - opencv=3.4.2
   - python=3.7
-  - pytorch=1.7.1
-  - scikit-image
+  - pip
+  - pytorch=1.10.2
+  - torchvision=0.11.3
+  - torchaudio
+  - cudatoolkit=11.3
+  - cudnn
+  - tensorflow-gpu=2.4.1
+  - pillow=8.0.0
+  - keras=2.4.3
+  - opencv
+  - h5py=2.10.0
+  - hdf5
+  - flask
+  - scikit-image=0.18.3
   - scikit-learn
   - scipy
   - sqlite
-  - torchaudio
-  - torchvision=0.8.2
-  - iopath
+  - iopath=0.1.8
   - omegaconf
-  - pip:
-    - google-auth
-    - google-auth-oauthlib
-    - h5py==2.10.0
-    - keras-preprocessing==1.1.2
-    - matplotlib
-    - numpy
-    - tensorboard
-    - tensorflow==2.3.2
+  - google-auth
+  - google-auth-oauthlib
+  - matplotlib
+  - ipython
+  - python-lmdb
+  - natsort
+#  - pip:
+#    - keras-preprocessing==1.1.2
+#    - tensorboard
+#    - tensorflow-gpu==2.2.0
+#    - keras==2.3.1
+
+# detectron2 설치
+# pip install 'git+https://github.com/facebookresearch/detectron2.git'
+# pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html

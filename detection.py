@@ -3,6 +3,7 @@ from detectron2.data import MetadataCatalog
 from detectron2.engine import DefaultPredictor
 from detectron2.utils.visualizer import Visualizer
 from tensorflow import keras
+# import keras
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -14,10 +15,56 @@ import numpy as np
 import os
 import cv2
 import random
+# Import MaskRCNN
+from mrcnn import model as modellib
+from mrcnn import visualize
+from text_detection import TextConfig
+from demo import run_mrcnn
 
+import skimage.draw
+
+import torch
+import torch.backends.cudnn as cudnn
+import torch.utils.data
+import torch.nn.functional as F
+
+from utils import CTCLabelConverter, AttnLabelConverter
+from dataset import RawDataset, AlignCollate
+from model import Model
+
+from kor_string import all_kor_string, family_string
+
+from dotted.collection import DottedDict
+from collections import OrderedDict
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 matplotlib.use('agg')
 count = 0
 
+opt = DottedDict({
+        "image_folder": "",
+        "workers": 4,
+        "batch_size": 192,
+        "saved_model": "ckpt/model_life_space/best_accuracy.pth",
+        "batch_max_length": 25,
+        "imgH": 64,
+        "imgW": 200,
+        "rgb": False,
+        "character": all_kor_string,
+        "sensitive": False,
+        "PAD": False,
+        "Transformation": "TPS",
+        "FeatureExtraction": "ResNet",
+        "SequenceModeling": "BiLSTM",
+        "Prediction": "CTC",
+        "num_fiducial": 20,
+        "input_channel": 1,
+        "output_channel": 512,
+        "hidden_size": 256,
+        "num_class": -1,
+        "num_gpu": torch.cuda.device_count(),
+        "converter": None
+    })
 
 def init():
     cfg = get_cfg()
@@ -26,7 +73,7 @@ def init():
     env_path = shutil.which('python')
     cfg.merge_from_file(env_path.replace("/bin/python",
         "/lib/python3.7/site-packages/detectron2/model_zoo/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"))
-    cfg.MODEL.WEIGHTS = "model_pretrained/model_final_f6e8b1.pkl"
+    cfg.MODEL.WEIGHTS = "ckpt/model_final_f6e8b1.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
 
     # Learning Rate
@@ -42,7 +89,7 @@ def init():
     # 3 classes
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
 
-    cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_tree/model_final.pth")
+    cfg.MODEL.WEIGHTS = os.path.join("ckpt/model_detection_tree/model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
 
     models = {}
@@ -53,42 +100,91 @@ def init():
     models['tree']['default'] = DefaultPredictor(cfg)
 
     models['tree']['crown_shape'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/crown_shape_model.h5")
+        "ckpt/model_classification_tree/crown_shape_model.h5")
     models['tree']['crown_shade'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/crown_shade_model.h5")
+        "ckpt/model_classification_tree/crown_shade_model.h5")
     models['tree']['crown_fruit'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/fruit_model.h5")
+        "ckpt/model_classification_tree/fruit_model.h5")
     models['tree']['cut_branch'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/cut_branch_model.h5")
+        "ckpt/model_classification_tree/cut_branch_model.h5")
     models['tree']['trunk_shape'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_shape_model.h5")
+        "ckpt/model_classification_tree/trunk_shape_model.h5")
     models['tree']['trunk_wave'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_wave_model.h5")
+        "ckpt/model_classification_tree/trunk_wave_model.h5")
     models['tree']['trunk_lines'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_lines_model.h5")
+        "ckpt/model_classification_tree/trunk_lines_model.h5")
     models['tree']['trunk_shade'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_shade_model.h5")
+        "ckpt/model_classification_tree/trunk_shade_model.h5")
     models['tree']['trunk_tilt'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_tilt_model.h5")
+        "ckpt/model_classification_tree/trunk_tilt_model.h5")
     models['tree']['trunk_pattern'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/trunk_pattern_model.h5")
+        "ckpt/model_classification_tree/trunk_pattern_model.h5")
     models['tree']['low_branch'] = keras.models.load_model(
-        "model_pretrained/model_classification_tree/low_branch_model.h5")
+        "ckpt/model_classification_tree/low_branch_model.h5")
 
-    cfg.MODEL.WEIGHTS = os.path.join("./model_pretrained/model_detection_cat/model_final.pth")
+    cfg.MODEL.WEIGHTS = os.path.join("ckpt/model_detection_cat/model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9
 
     models['cat']['default'] = DefaultPredictor(cfg)
-    models['cat']['concept'] = keras.models.load_model("model_pretrained/model_classification_cat/concept_model.h5")
+    models['cat']['concept'] = keras.models.load_model("ckpt/model_classification_cat/concept_model.h5")
     models['cat']['movement'] = keras.models.load_model(
-        "model_pretrained/model_classification_cat/movement_model.h5")
+        "ckpt/model_classification_cat/movement_model.h5")
 
-    # cfg.MODEL.WEIGHTS = "./model_pretrained/model_life_space/best_accuracy.pth"
-    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9
+    # Lifespace Detection Setting
 
-    # models['life']['default'] = keras.models.load_model("model_pretrained/model_life_space/mask_rcnn_text_0001.h5")
+    # Parse command line arguments
+
+    weights = 'ckpt/model_life_space/mask_rcnn_text_0001.h5'
+    _, models['life']['mrcnn'] = set_detection(weights)
+
+    cudnn.benchmark = True
+    cudnn.deterministic = True
+
+    opt.converter = CTCLabelConverter(all_kor_string)
+    opt.num_class = len(opt.converter.character)
+
+    print('deep-text-recognition-benchmark parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
+          opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
+          opt.SequenceModeling, opt.Prediction)
+
+    models['life']['dtrb'] = Model(opt).to(device)
+
+    # load model
+    print('loading pretrained model from %s' % opt.saved_model)
+    state_dict = torch.load(opt.saved_model, map_location=device)
+
+    from collections import OrderedDict
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        new_k = k.replace("module.", "")
+        new_state_dict[new_k] = v
+
+    models['life']['dtrb'].load_state_dict(new_state_dict)
 
     return models
+
+
+def set_detection(weights):
+    class InferenceConfig(TextConfig):
+        # Set batch size to 1 since we'll be running inference on
+        # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
+        GPU_COUNT = 1
+        IMAGES_PER_GPU = 1
+
+    config = InferenceConfig()
+    #config.display()
+
+    model = modellib.MaskRCNN(mode="inference", config=config,
+                              model_dir=weights)
+
+    # Select weights file to load
+    weights_path = weights
+
+    # Load weights
+    print("Loading weights ", weights_path)
+    model.load_weights(weights_path, by_name=True)
+
+    return config, model
 
 
 # sentence forming
@@ -146,7 +242,7 @@ def test_life_space(models, img_dir):
 
 def test_tree(models, img_dir):
     dest = img_dir.replace(os.path.basename(img_dir), '')
-    path_details = {}
+    path_details = OrderedDict()
 
     models['default'].cfg.DATASETS.TEST = (img_dir,)
 
@@ -373,7 +469,7 @@ def test_cat(models, img_dir):
         :return: cat image, trunk image, head image, body image with detected region, result sentence
         """
     dest = img_dir.replace(os.path.basename(img_dir), '')
-    path_details = {}
+    path_details = OrderedDict()
 
     models['default'].cfg.DATASETS.TEST = (img_dir,)
     test_metadata = MetadataCatalog.get(img_dir)
@@ -486,23 +582,37 @@ def test_cat(models, img_dir):
     # Draw pie graph with the result
     plt.rcParams['figure.figsize'] = [12, 8]
 
-    group_names = ['right brain', 'left brain']
-    group_sizes = [right, left]
-    group_colors = ['red', 'blue']
+    percent = left / 10. * 100.
+    group_names = ['left brain: {}%'.format(percent), ' ']
+    group_sizes = [left, 10 - left]
+    group_colors = ['red', 'white']
 
+    plt.subplot(1, 2, 1)
     plt.pie(group_sizes,
             labels=group_names,
             colors=group_colors,
-            autopct='%1.2f%%',  # second decimal place
             shadow=True,
             startangle=90,
             textprops={'fontsize': 14})  # text font size
+    plt.axis('equal')  # equal length of X and Y axis
+
+    percent = right / 10. * 100.
+    group_names = [' ', 'right brain: {}%'.format(percent)]
+    group_sizes = [10 - right, right]
+    group_colors = ['white', 'blue']
+
+    plt.subplot(1, 2, 2)
+    plt.pie(group_sizes,
+            labels=group_names,
+            colors=group_colors,
+            shadow=True,
+            startangle=90,
+            textprops={'fontsize': 14})  # text font size
+    plt.axis('equal')  # equal length of X and Y axis
 
     name = "{}_{}.jpg".format(filename.split('.')[0], "plot")
     path_plot = os.path.join(dest, name)
 
-    plt.axis('equal')  # equal length of X and Y axis
-    plt.title('Your brain is?', fontsize=20)
     plt.savefig(path_plot)
 
     # plt.show()
@@ -519,3 +629,71 @@ def test_cat(models, img_dir):
 
     # return path_list['cat'], path_list['head'], path_list['body'], path_detected, result, path_plot
     return path_details, path_detected, path_plot, final_sentence
+
+
+def test_life(models, img_path):
+
+    dir_path = os.path.dirname(img_path)
+    opt.image_folder = os.path.join(dir_path, 'cropped')
+    os.mkdir(opt.image_folder)
+
+    bbox, result = run_mrcnn(detection_model=models['mrcnn'], padding=5, image_path=img_path)
+
+    # prepare data. two demo images from https://github.com/bgshih/crnn#run-demo
+    AlignCollate_demo = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD)
+    demo_data = RawDataset(root=opt.image_folder, opt=opt)  # use RawDataset
+    demo_loader = torch.utils.data.DataLoader(
+        demo_data, batch_size=opt.batch_size,
+        shuffle=False,
+        num_workers=int(opt.workers),
+        collate_fn=AlignCollate_demo, pin_memory=True)
+
+    crop_names = []
+    final_results = OrderedDict()
+    final_results["Detection"] = os.path.join(dir_path, "bb_visualize.jpg")
+
+    # predict
+    models['dtrb'].eval()
+    with torch.no_grad():
+        for image_tensors, image_path_list in demo_loader:
+            batch_size = image_tensors.size(0)
+            cropped_image = image_tensors.to(device)
+            # For max length prediction
+            length_for_pred = torch.IntTensor([opt.batch_max_length] * batch_size).to(device)
+            text_for_pred = torch.LongTensor(batch_size, opt.batch_max_length + 1).fill_(0).to(device)
+
+            preds = models['dtrb'](cropped_image, text_for_pred)
+
+            # Select max probabilty (greedy decoding) then decode index to character
+            preds_size = torch.IntTensor([preds.size(1)] * batch_size)
+            _, preds_index = preds.max(2)
+            # preds_index = preds_index.view(-1)
+            preds_str = opt.converter.decode(preds_index, preds_size)
+
+            log = open(os.path.join(os.path.dirname(img_path), f'log_demo_result.txt'), 'a')
+            dashed_line = '-' * 80
+            head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
+
+            print(f'{dashed_line}\n{head}\n{dashed_line}')
+            log.write(f'{dashed_line}\n{head}\n{dashed_line}\n')
+
+            preds_prob = F.softmax(preds, dim=2)
+            preds_max_prob, _ = preds_prob.max(dim=2)
+            for img_name, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
+
+                final_results[pred] = img_name
+
+                confidence_score = pred_max_prob.cumprod(dim=0)[-1]
+                crop_names.append(pred)
+                print(f'{os.path.basename(img_name):25s}\t{pred:25s}\t{confidence_score:0.4f}')
+                log.write(f'{os.path.basename(img_name):25s}\t{pred:25s}\t{confidence_score:0.4f}\n')
+
+            log.close()
+
+    image = skimage.io.imread(img_path)
+    image = skimage.color.gray2rgb(image)
+    visualize.display_instances_with_grid(final_results["Detection"],
+                                          image, bbox, result['masks'], result['class_ids'],
+                                          crop_names, result['scores'], title=img_path)
+
+    return final_results

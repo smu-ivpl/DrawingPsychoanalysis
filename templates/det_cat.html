@@ -13,26 +13,6 @@
 </head>
 
 <body>
-<!--
-	<br>
-	<h1 align="center">Drawing Test</h1>
-	<br>
-	<form align="center" action="/det_post" method="POST" enctype="multipart/form-data">
-		<h2 align="center">Type</h2>
-		<table align="center">
-			<tr>
-				<td><input type="radio" name="options" value="tree">tree</td>
-				<td><input type="radio" name="options" value="cat">cat</td>
-			</tr>
-		</table>
-		<br><br>
-		<h2 align="center">Target Image</h2>
-		<div align="center" id='view_area'></div>
-		<br>
-		<input type="file" name="user_img" id="user_img" value="userImage" onchange="previewImage(this,'view_area')"/>
-		<input type="submit" value="확인"/>
-	</form>
-	<br><br><br>-->
 	<header class="main_menu home_menu">
         <div class="container">
             <div class="row align-items-center">
@@ -48,10 +28,13 @@
                                     <a class="nav-link" href="/index#about">About</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get">Cat Test</a>
+                                    <a class="nav-link" href="/det_cat">Cat Test</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/det_get2">Tree Test</a>
+                                    <a class="nav-link" href="/det_tree">Tree Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/det_life">Life Space</a>
                                 </li>
                             </ul>
                         </div>
@@ -81,12 +64,10 @@
 
 	<footer id = "footer">
         <div style="text-align: center; line-height: 32px;">
-<!--            구본정, 장정인, 파올라-->
             <a href="https://ivpl.sookmyung.ac.kr">
                 <img src="../static/img/ivpl_logo.png" style="width:150px">
             </a>
             <br>
-<!--            http://www.sookmyung.ac.kr/sookmyungkr/index.do-->
         </div>
     </footer>
 

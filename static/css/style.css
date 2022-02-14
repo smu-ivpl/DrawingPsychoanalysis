@@ -209,6 +209,13 @@ nav {
   background-image: url("../img/treeimg.jpg");
 }
 
+#view_area_life{
+  width: 600px;
+  height: 400px;
+  margin: auto;
+  background-image: url("../img/lifeimg.jpg");
+}
+
 input[type="file"] {
   position: absolute;
   z-index: -1;
