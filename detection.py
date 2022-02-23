@@ -523,8 +523,6 @@ def test_cat(models, img_dir):
     # crop image
     for k, v in boxes.items():
         crop_img = im[v[1]:v[3], v[0]:v[2], :]
-        # plt.imshow(crop_img, interpolation='nearest')
-        # plt.show()
 
         ratio = 350.0 / crop_img.shape[1]
         dim = (350, int(crop_img.shape[0] * ratio))
@@ -535,9 +533,6 @@ def test_cat(models, img_dir):
         cv2.imwrite(path_details[k], resized_img)
 
     # endregion
-
-    # From this line, we get image attributes with classification models
-    # Check attributes and see which brain is more active. Left brain or right brain?
 
     # First, check cat attributes
     left = 0
