@@ -322,7 +322,7 @@ def test_tree(models, img_dir):
 
     if len(img_array) == 3:
         # 뿌리 보임
-        sentence0 = "원시성이 있는, 전통과의 결부가 보이는, 정확성 있는, "
+        sentence0 = "\nroots: 원시성이 있는, 전통과의 결부가 보이는, 정확성 있는, "
         final_sentence = final_sentence + sentence0
 
     img = img_array[0]
@@ -335,7 +335,7 @@ def test_tree(models, img_dir):
     print("tree_model_crown_shape")
     pred = models['crown_shape'].predict(bottle_resized)
 
-    crown_str = "왕관: "
+    crown_str = "\nbranches: "
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
         # 아케이드 모양
         crown_str += "감수성이 있는, 예의 바른, 의무감, "
@@ -363,7 +363,7 @@ def test_tree(models, img_dir):
         crown_str += "발달이 지체된, 자기 표현 능력이 결여된, 독립심이 결여된, "
     # endregion
 
-    if crown_str != "왕관: ":
+    if crown_str != "\nbranches: ":
         final_sentence += crown_str
 
     # region Class: cut branch
@@ -384,7 +384,7 @@ def test_tree(models, img_dir):
     print("tree_model_trunk_shape")
     pred = models['trunk_shape'].predict(bottle_resized2)
 
-    trunk_str = "나무기둥: "
+    trunk_str = "\ntrunk: "
     if pred[0, 0] > pred[0, 1]:
         # 양쪽으로 넓은
         trunk_str += "봉쇄적 사고가 있는, 이해가 느린, 학습곤란, "
@@ -459,7 +459,7 @@ def test_tree(models, img_dir):
         trunk_str += "신뢰성이 없는, 행동이 어린 아이 같은, 부분적 발달 억제, "
     # endregion
 
-    if trunk_str != "나무기둥: ":
+    if trunk_str != "\ntrunk: ":
         final_sentence += trunk_str
 
     return path_details, path_detected, final_sentence
