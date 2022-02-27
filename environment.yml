@@ -31,7 +31,8 @@ dependencies:
   - ipython
   - python-lmdb
   - natsort
-#  - pip:
+  - pip:
+      - dotted
 #    - keras-preprocessing==1.1.2
 #    - tensorboard
 #    - tensorflow-gpu==2.2.0
