@@ -187,19 +187,6 @@ def set_detection(weights):
     return config, model
 
 
-# sentence forming
-def adj_sentence(attr1, attr2, adj, adj3):
-    sentences = ["%s이 %s인 것으로 보아 당신은 %s이고 %s이 있는 것으로 보여집니다.",
-                 "%s이(가) %s로 나타남으로써 당신은 %s이고 %s 경향이 보여집니다.",
-                 "당신의 그림의 %s이(가) %s인 것으로 보아 당신은 %s이고 %s이 있어보입니다.",
-                 "당신이 그린 그림을 보니 %s이(가) %s인 것을 보아 %s이고 %s를 내제하고 있는 것이 보여집니다."]
-
-    sentence = random.choice(sentences)
-
-    sentence = sentence % (attr1, attr2, adj, adj3)
-    return sentence
-
-
 def getWhitePercent(img, total, x0, x1, y0, y1):
     global count
     white = 0
@@ -284,11 +271,12 @@ def test_tree(models, img_dir):
     count = getWhitePercent(img, total, 0, img.shape[0], y2, img.shape[1])
 
     if count >= 3:
-        results = "꽉 찬 공간밀도, "
+        # 꽉 찬 공간밀도
+        results = "근면한, 본능에 끌리지 않는, 갇힌 감정 상태, "
     else:
-        results = "비어있는 공간밀도, "
+        # 비어있는 공간밀도
+        results = "민감한, 겸손한, 정신적으로 어찌할 바를 모르는 상태, "
 
-    # final_sentence = sentence00 + "\r\n"
     final_sentence = results
 
     boxes = {}
@@ -333,7 +321,8 @@ def test_tree(models, img_dir):
         img_array.append(crop_img)
 
     if len(img_array) == 3:
-        sentence0 = "뿌리 보임, "
+        # 뿌리 보임
+        sentence0 = "원시성이 있는, 전통과의 결부가 보이는, 정확성 있는, "
         final_sentence = final_sentence + sentence0
 
     img = img_array[0]
@@ -348,10 +337,12 @@ def test_tree(models, img_dir):
 
     crown_str = "왕관: "
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
-        crown_str += "아케이드 모양, "
+        # 아케이드 모양
+        crown_str += "감수성이 있는, 예의 바른, 의무감, "
 
     elif pred[0, 1] > pred[0, 2]:
-        crown_str += "공 모양, "
+        # 공 모양
+        crown_str += "에너지가 부족한, 구성 감각이 결여된, 텅빈 마음, "
     # endregion
 
     # region Class: crown shade
@@ -359,7 +350,8 @@ def test_tree(models, img_dir):
     pred = models['crown_shade'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        crown_str += "그림자 진, "
+        # 그림자 있는
+        crown_str += "분위기에 좌우되는, 정확성이 결여된, 부드러움, "
     # endregion
 
     # region Class: crown fruit
@@ -367,7 +359,8 @@ def test_tree(models, img_dir):
     pred = models['crown_fruit'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        crown_str += "과일 달린, "
+        # 과일 달린
+        crown_str += "발달이 지체된, 자기 표현 능력이 결여된, 독립심이 결여된, "
     # endregion
 
     if crown_str != "왕관: ":
@@ -378,7 +371,8 @@ def test_tree(models, img_dir):
     pred = models['cut_branch'].predict(bottle_resized)
 
     if pred[0, 0] > pred[0, 1]:
-        final_sentence += "잘린 나뭇가지, "
+        # 잘린 나뭇가지
+        final_sentence += "생존 의지가 있는, 억제되어 있는, 저항력, "
 
     # Last, check tree attributes for trunk
     img2 = img_array[1]
@@ -392,9 +386,11 @@ def test_tree(models, img_dir):
 
     trunk_str = "나무기둥: "
     if pred[0, 0] > pred[0, 1]:
-        trunk_str += "양쪽으로 넓은, "
+        # 양쪽으로 넓은
+        trunk_str += "봉쇄적 사고가 있는, 이해가 느린, 학습곤란, "
     else:
-        trunk_str += "직선 모양의, "
+        # 직선 모양의
+        trunk_str += "규범적인, 고집이 센, 냉정함, "
     # endregion
 
     # region Class: trunk wave
@@ -402,7 +398,8 @@ def test_tree(models, img_dir):
     pred = models['trunk_wave'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        trunk_str += "구불거리는 형태의, "
+        # 구불거리는 형태
+        trunk_str += "생동감이 있는, 적응력이 큰, 생기있는, "
     # endregion
 
     # region Class: trunk lines
@@ -410,7 +407,8 @@ def test_tree(models, img_dir):
     pred = models['trunk_lines'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        trunk_str += "흩어진 선으로 된, "
+        # 흩어진 선으로 된
+        trunk_str += "예민한, 감정이입이 강한 경향, 민감성, "
     # endregion
 
     # region Class: trunk shade
@@ -418,11 +416,14 @@ def test_tree(models, img_dir):
     pred = models['trunk_shade'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2] and pred[0, 0] > pred[0, 3]:
-        trunk_str += "전체 명암이 있는, "
+        # 전체 명암이 있는
+        trunk_str += "수동적인, 강박적인, 불안정감, "
     elif pred[0, 1] > pred[0, 2] and pred[0, 1] > pred[0, 0] and pred[0, 1] > pred[0, 3]:
-        trunk_str += "우측의 그림자, "
+        # 우측의 그림자
+        trunk_str += "접촉할 능력이 있는, 적응력, "
     elif pred[0, 2] > pred[0, 0] and pred[0, 2] > pred[0, 1] and pred[0, 2] > pred[0, 3]:
-        trunk_str += "좌측의 그림자, "
+        # 좌측의 그림자
+        trunk_str += "외향적인, 억제하는 경향, 민감성, "
     # endregion
 
     # region Class: trunk tilt
@@ -430,9 +431,11 @@ def test_tree(models, img_dir):
     pred = models['trunk_tilt'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1] and pred[0, 0] > pred[0, 2]:
-        trunk_str += "우측으로 기울어진, "
+        # 우측으로 기울어진
+        trunk_str += "집중을 잘하는, 유혹에 빠지기 쉬운, "
     elif pred[0, 1] > pred[0, 2]:
-        trunk_str += "좌측으로 기울어진, "
+        # 좌측으로 기울어진
+        trunk_str += "도전적인, 감정을 억누르는 경향이 있는, 방어적 태도, "
     # endregion
 
     # region Class: trunk pattern
@@ -440,9 +443,11 @@ def test_tree(models, img_dir):
     pred = models['trunk_pattern'].predict(bottle_resized2)
 
     if pred[0, 1] > pred[0, 0] and pred[0, 1] > pred[0, 2]:
-        trunk_str += "둥근 껍질 무늬, "
+        # 둥근 껍질 무늬
+        trunk_str += "접촉을 위한 준비 능력이 있는, 자발적 적응 능력, "
     elif pred[0, 2] > pred[0, 1]:
-        trunk_str += "긁힌 무늬, "
+        # 긁힌 무늬
+        trunk_str += "냉정한, 규범적인, 고집 센, "
     # endregion
 
     # region Class: low branch
@@ -450,7 +455,8 @@ def test_tree(models, img_dir):
     pred = models['low_branch'].predict(bottle_resized2)
 
     if pred[0, 0] > pred[0, 1]:
-        trunk_str += "가지가 있는, "
+        # 가지가 있는
+        trunk_str += "신뢰성이 없는, 행동이 어린 아이 같은, 부분적 발달 억제, "
     # endregion
 
     if trunk_str != "나무기둥: ":
